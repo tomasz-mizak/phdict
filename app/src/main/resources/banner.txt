@@ -1,0 +1,7 @@
+
+  ┓  ┓•
+┏┓┣┓┏┫┓┏╋
+┣┛┛┗┗┻┗┗┗
+┛
+
+Pharmacy dictionary service.
