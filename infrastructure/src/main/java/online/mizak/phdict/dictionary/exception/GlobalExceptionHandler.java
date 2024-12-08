@@ -17,7 +17,7 @@ class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NotAcceptableException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
     public Map<String, String> handleIllegalArgument(NotAcceptableException ex) {
         return Map.of("msg", ex.getMessage());
     }
