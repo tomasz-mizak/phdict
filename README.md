@@ -1,0 +1,3 @@
+# phdict
+
+Pharmacy dictionary application.

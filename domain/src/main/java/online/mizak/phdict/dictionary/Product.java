@@ -1,5 +1,7 @@
 package online.mizak.phdict.dictionary;
 
+import online.mizak.phdict.dictionary.dto.ProductDto;
+
 class Product {
     private final Long id;
     private final String eanCode;
@@ -29,6 +31,10 @@ class Product {
 
     public String getTradeName() {
         return tradeName;
+    }
+
+    ProductDto toDto() {
+        return new ProductDto(eanCode, tradeName);
     }
 
 }

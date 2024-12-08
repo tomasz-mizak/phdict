@@ -24,6 +24,11 @@ class InMemoryProductRepository implements ProductRepository {
     }
 
     @Override
+    public Long countAll() {
+        return (long) store.size();
+    }
+
+    @Override
     public Optional<Product> findByEanCode(String eanCode) {
         return store.values().stream()
                 .filter(p -> p.getEanCode().equalsIgnoreCase(eanCode))
