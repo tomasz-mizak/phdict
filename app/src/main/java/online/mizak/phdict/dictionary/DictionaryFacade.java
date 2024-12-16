@@ -20,7 +20,7 @@ public class DictionaryFacade {
     }
 
     public void createDictionaryProduct(String eanCode, String tradeName) {
-        if (!eanCodeUniquenessPolicy.isUnique(eanCode)) throw new NotAcceptableException("EAN code must be unique");
+        if (!eanCodeUniquenessPolicy.isUnique(eanCode)) throw new NotAcceptableException("EAN code must be unique", ErrorCode.NO_PRODUCT_AVAILABLE);
         var newProductEntry = Product.of(eanCode, tradeName);
         productRepository.save(newProductEntry);
     }
@@ -34,7 +34,7 @@ public class DictionaryFacade {
     }
 
     public ProductDto showDictionaryProductByEanCode(String eanCode) {
-        return productRepository.findByEanCode(eanCode).map(Product::toDto).orElseThrow(() -> new NotFoundException("Product by EAN code not found"));
+        return productRepository.findByEanCode(eanCode).map(Product::toDto).orElseThrow(() -> new NotFoundException("Product by EAN code not found", ErrorCode.NO_PRODUCT_AVAILABLE));
     }
 
 }

@@ -3,4 +3,7 @@
 Pharmacy dictionary application.
 
 ## todo list
-- polish dictionary adapter as separated module https://rejestry.ezdrowie.gov.pl/rpl/search/public
+- źródło importu w domenie głównej
+  - zapisywanie czasu importu z źródła
+  - wystawienie fasady do pobierania ostatniego dnia importu z danego źródła
+  - 
