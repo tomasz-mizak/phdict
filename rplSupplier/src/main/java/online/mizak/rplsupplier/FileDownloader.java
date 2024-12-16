@@ -12,7 +12,7 @@ import java.net.URL;
 import java.nio.file.Files;
 
 @Slf4j
-public abstract class FileDownloader {
+abstract class FileDownloader {
 
     /**
      * Converts file size in bytes to a human-readable format.

@@ -20,7 +20,7 @@ public class DictionaryFacade {
     }
 
     public void createDictionaryProduct(String eanCode, String tradeName) {
-        if (!eanCodeUniquenessPolicy.isUnique(eanCode)) throw new NotAcceptableException("EAN code must be unique", ErrorCode.NO_PRODUCT_AVAILABLE);
+        if (!eanCodeUniquenessPolicy.isUnique(eanCode)) throw new NotAcceptableException("EAN code must be unique", ErrorCode.PRODUCT_ALREADY_EXISTS);
         var newProductEntry = Product.of(eanCode, tradeName);
         productRepository.save(newProductEntry);
     }

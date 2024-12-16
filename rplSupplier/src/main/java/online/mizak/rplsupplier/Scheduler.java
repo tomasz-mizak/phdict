@@ -31,21 +31,23 @@ class Scheduler {
 
         try {
             var file = FileDownloader.downloadFileToTemp(overallUrl);
+            log.info("# - - - File has been downloaded - - - #");
             log.info("# Download File: {}", file);
             log.info("# From URL: {}", overallUrl);
-            log.info("# To URL: {}", file.getAbsolutePath());
             log.info("# Total size: {}", FileDownloader.humanReadableFileSize(file.length()));
 
             var products = RplDataReader.read(file);
+            log.info("# - - - Rpl data reader - - - #");
+            log.info("# Total products: {}", products.size());
 
+            log.info("# - - - Adding products to phdict - - - #");
             for (CreateDictionaryProduct product : products) {
                 try {
                     var result = phDictApi.createDictionaryProduct(product);
-                    log.info("# Create Dictionary Product: {}", result);
                 } catch (FeignException.FeignClientException feignClientException) {
                     var errorDetails = mapper.readValue(feignClientException.contentUTF8(), ErrorDetails.class);
-                    if (!errorDetails.code().equals("EAN_CODE_ALREADY_EXISTS")) {
-                        log.error("# Create Dictionary Product: {}", errorDetails);
+                    if (!errorDetails.code().equals("PRODUCT_ALREADY_EXISTS")) {
+                        log.error("Unhandled exception has been occurred '{}' for product '{}'.", errorDetails, product);
                     }
                 }
             }
