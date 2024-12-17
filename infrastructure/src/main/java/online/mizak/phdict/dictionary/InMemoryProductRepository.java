@@ -19,6 +19,15 @@ class InMemoryProductRepository implements ProductRepository {
     }
 
     @Override
+    public void saveAll(List<Product> products) {
+        products.forEach(product -> {
+            var id = product.isPersisted() ? product.getId() : idGenerator.incrementAndGet();
+            Product persisted = new Product(id, product.getEanCode(), product.getTradeName());
+            store.put(persisted.getId(), persisted);
+        });
+    }
+
+    @Override
     public List<Product> findAll() {
         return List.copyOf(store.values());
     }
