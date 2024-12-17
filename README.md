@@ -10,6 +10,8 @@ Pharmacy dictionary application.
   - zapewnić raport importu, prosty json z informacjami
 - import csv
   - akceptujący kolumny takie jak encja domeny
+  - maks wielkość pliku do ustawienia
+  - raport importu, prosty json z informacjami
 
 - źródło importu w domenie głównej
   - zapisywanie czasu importu z źródła
