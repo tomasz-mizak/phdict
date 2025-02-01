@@ -2,18 +2,12 @@
 
 Pharmacy dictionary application.
 
-## todo list
+## Import data
+Actually are three different methods to import dictionary product data.
+1. One-by-one - adding product using create endpoint.
+2. Batch - adding products using create endpoint, eat json list as request body.
 
-- import liniowy (ok)
-- import paczki (do 5k, zdefiniować w app.properties)
-  - zapewnić asynchroniczność
-  - zapewnić raport importu, prosty json z informacjami
-- import csv
-  - akceptujący kolumny takie jak encja domeny
-  - maks wielkość pliku do ustawienia
-  - raport importu, prosty json z informacjami
+All import methods return simple report about success rate.
 
-- źródło importu w domenie głównej
-  - zapisywanie czasu importu z źródła
-  - wystawienie fasady do pobierania ostatniego dnia importu z danego źródła
-  - 
+
+## Todo

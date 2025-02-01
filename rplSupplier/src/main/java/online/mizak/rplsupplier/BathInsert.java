@@ -1,6 +1,5 @@
 package online.mizak.rplsupplier;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -30,19 +29,17 @@ class BathInsert {
     }
 
     void run() {
-        log.info("# Schedule");
-
-        var mapper = new ObjectMapper();
+        log.info("# - - - Starting batch insert - - - #");
 
         try {
             var file = FileDownloader.downloadFileToTemp(overallUrl);
-            log.info("# - - - File has been downloaded - - - #");
-            log.info("# Total size: {}", FileDownloader.humanReadableFileSize(file.length()));
+            log.info("# - - - Source file has been downloaded - - - #");
+            log.info("Total size: {}", FileDownloader.humanReadableFileSize(file.length()));
 
             var products = RplDataReader.read(file);
             log.info("# Total products: {}", products.size());
 
-            int batchSize = 2000;
+            int batchSize = 5000;
             int totalProducts = products.size();
             int productCounter = 0;
             int successCounter = 0;
@@ -52,17 +49,15 @@ class BathInsert {
             long startTime = System.currentTimeMillis();
             List<ErrorDetails> errorDetailsList = new ArrayList<>();
 
-            // Dzielenie produktów na paczki
             for (int i = 0; i < totalProducts; i += batchSize) {
                 List<CreateDictionaryProduct> batch = products.subList(i, Math.min(i + batchSize, totalProducts));
 
                 try {
-                    // Wysłanie paczki produktów do drugiej aplikacji
                     phDictApi.createDictionaryProducts(batch);
                     successCounter += batch.size();
                 } catch (FeignException.FeignClientException feignClientException) {
                     failCounter += batch.size();
-                    log.error("Batch failed: {}", feignClientException.getMessage()); // todo, sprawdzić czy jak wyjebie to nie powinno przyjąc całego batcha!
+                    log.error("Batch failed: {}", feignClientException.getMessage()); // todo, sprawdzić czy jak wywali to nie powinno przyjąc całego batcha!
                 }
 
                 productCounter += batch.size();

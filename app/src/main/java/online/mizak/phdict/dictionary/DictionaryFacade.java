@@ -5,7 +5,8 @@ import online.mizak.phdict.dictionary.dto.CreateDictionaryProduct;
 import online.mizak.phdict.dictionary.dto.ProductDto;
 import online.mizak.phdict.dictionary.exception.NotAcceptableException;
 import online.mizak.phdict.dictionary.exception.NotFoundException;
-import org.springframework.scheduling.annotation.Async;
+import online.mizak.phdict.utils.Color;
+import online.mizak.phdict.utils.JSON;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -27,23 +28,27 @@ public class DictionaryFacade {
     }
 
     public void createDictionaryProduct(CreateDictionaryProduct createDictionaryProduct) {
-        if (!eanCodeUniquenessPolicy.isUnique(createDictionaryProduct.eanCode())) throw new NotAcceptableException("EAN code must be unique", ErrorCode.PRODUCT_ALREADY_EXISTS);
+        if (!eanCodeUniquenessPolicy.isUnique(createDictionaryProduct.eanCode()))
+            throw new NotAcceptableException("EAN code must be unique", ErrorCode.PRODUCT_ALREADY_EXISTS);
         var newProductEntry = Product.of(createDictionaryProduct.eanCode(), createDictionaryProduct.tradeName());
         productRepository.save(newProductEntry);
         log.info("New product created: {}", newProductEntry.toDto());
     }
 
-//    @Async // todo, niech czeka z zwróceniem resulta
     public void createDictionaryProducts(List<CreateDictionaryProduct> products) {
         List<Product> productsToSave = new ArrayList<>();
         for (CreateDictionaryProduct product : products) {
-            if (!eanCodeUniquenessPolicy.isUnique(product.eanCode())) continue;
-            var newProductEntry = Product.of(product.eanCode(), product.tradeName());
-            productsToSave.add(newProductEntry);
+            try {
+                if (!eanCodeUniquenessPolicy.isUnique(product.eanCode()))
+                    throw new RuntimeException("Product with eanCode %s currently exists.".formatted(product.eanCode()));
+                var newProductEntry = Product.of(product.eanCode(), product.tradeName());
+                productsToSave.add(newProductEntry);
+            } catch (Exception e) {
+                log.warn(Color.yellowBold("Failed to save product. {}\n{}"), e.getMessage(), JSON.stringify(product));
+            }
         }
         productRepository.saveAll(productsToSave);
-        log.info("Created {} bulk products.", productsToSave.size());
-        // todo, maybe return result info.
+        if (!productsToSave.isEmpty()) log.info("Created {} bulk products.", productsToSave.size());
     }
 
     public Long showProductsCount() {

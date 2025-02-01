@@ -15,6 +15,7 @@
         <module>domain</module>
         <module>infrastructure</module>
         <module>app</module>
+        <module>utils</module>
     </modules>
 
 </project>

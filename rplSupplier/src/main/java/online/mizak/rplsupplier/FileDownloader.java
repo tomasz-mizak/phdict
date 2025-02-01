@@ -40,7 +40,7 @@ abstract class FileDownloader {
         try (FileOutputStream fos = new FileOutputStream(tempFile)) {
             fos.write(fileData);
         }
-        System.out.println("File downloaded successfully to temporary file: " + tempFile.getAbsolutePath());
+        log.info("File downloaded successfully to temporary file: " + tempFile.getAbsolutePath());
         return tempFile;
     }
 
@@ -56,7 +56,7 @@ abstract class FileDownloader {
         try (FileOutputStream fos = new FileOutputStream(savePath)) {
             fos.write(fileData);
         }
-        System.out.println("File downloaded successfully to: " + savePath);
+        log.info("File downloaded successfully to: " + savePath);
     }
 
     /**
@@ -97,7 +97,7 @@ abstract class FileDownloader {
                 byteArrayOutputStream.write(buffer, 0, bytesRead);
             }
 
-            System.out.println("File downloaded successfully to memory.");
+            log.info("File downloaded successfully to memory.");
             return byteArrayOutputStream.toByteArray();
 
         } finally {
