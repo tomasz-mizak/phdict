@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @FeignClient(name = "phdictApiClient", url = "localhost:8080/phdict/api/v1")
 interface PhDictApi {
@@ -14,6 +15,6 @@ interface PhDictApi {
     ResponseEntity<Object> createDictionaryProduct(@RequestBody CreateDictionaryProduct createDictionaryProduct);
 
     @PostMapping("/dictionary/product/batch")
-    ResponseEntity<Object> createDictionaryProducts(@RequestBody List<CreateDictionaryProduct> createDictionaryProduct);
+    CompletableFuture<Object> createDictionaryProducts(@RequestBody List<CreateDictionaryProduct> createDictionaryProduct);
 
 }

@@ -9,23 +9,23 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Slf4j
 @Service
-class BathInsert {
+public class BathInsert {
 
     @Value("${rpl.overall.url}")
     private String overallUrl;
 
     private final PhDictApi phDictApi;
 
+    private final ExecutorService executorService = Executors.newFixedThreadPool(5);
+
     BathInsert(PhDictApi phDictApi) {
         this.phDictApi = phDictApi;
-    }
-
-    @PostConstruct
-    void init() {
-        run();
     }
 
     void run() {
@@ -37,50 +37,43 @@ class BathInsert {
             log.info("Total size: {}", FileDownloader.humanReadableFileSize(file.length()));
 
             var products = RplDataReader.read(file);
-            log.info("# Total products: {}", products.size());
+            log.info("Total products: {}", products.size());
 
-            int batchSize = 5000;
+            int batchSize = 1000;
             int totalProducts = products.size();
-            int productCounter = 0;
-            int successCounter = 0;
-            int failCounter = 0;
-            int barLength = 50;
 
-            long startTime = System.currentTimeMillis();
-            List<ErrorDetails> errorDetailsList = new ArrayList<>();
+            List<CompletableFuture<Void>> futures = new ArrayList<>();
 
             for (int i = 0; i < totalProducts; i += batchSize) {
                 List<CreateDictionaryProduct> batch = products.subList(i, Math.min(i + batchSize, totalProducts));
 
-                try {
-                    phDictApi.createDictionaryProducts(batch);
-                    successCounter += batch.size();
-                } catch (FeignException.FeignClientException feignClientException) {
-                    failCounter += batch.size();
-                    log.error("Batch failed: {}", feignClientException.getMessage()); // todo, sprawdzić czy jak wywali to nie powinno przyjąc całego batcha!
-                }
+                /**
+                 * CompletableFuture.supplyAsync(() -> {
+                 *     // długotrwała operacja
+                 *     return "Wynik";
+                 * }).thenApply(result -> {
+                 *     // przetwarzanie wyniku
+                 *     return result + " przetworzony";
+                 * }).thenAccept(System.out::println)
+                 *   .exceptionally(ex -> {
+                 *       System.err.println("Błąd: " + ex.getMessage());
+                 *       return null;
+                 *   });
+                 */
 
-                productCounter += batch.size();
-                int progress = (int) ((productCounter / (double) totalProducts) * barLength);
-                String progressBar = "=".repeat(progress) + " ".repeat(barLength - progress);
+                CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                        phDictApi.createDictionaryProducts(batch).join();
+                }, executorService);
+                futures.add(future);
 
-                long elapsedTime = System.currentTimeMillis() - startTime;
-                String timer = formatTime(elapsedTime);
-
-                System.out.printf("\rProgress: [%s] %d%% (%d/%d) (success: %d/ fail: %d) Time Elapsed: %s",
-                        progressBar, (int) ((productCounter / (double) totalProducts) * 100),
-                        productCounter, totalProducts, successCounter, failCounter, timer);
             }
-            System.out.println();
-            log.info("# Finished adding all products to phdict.");
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 
-            if (failCounter > 0) {
-                log.info("# Number of failed products: {}", failCounter);
-            }
+            log.info("Upload finished.");
 
             boolean isDeleted = file.delete();
             if (isDeleted) {
-                log.info("# Deleted file: {}", file);
+                log.info("Deleted file: {}", file);
             }
 
         } catch (IOException e) {
