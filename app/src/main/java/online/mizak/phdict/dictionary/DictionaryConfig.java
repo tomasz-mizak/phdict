@@ -8,8 +8,7 @@ class DictionaryConfig {
 
     @Bean
     DictionaryFacade dictionaryFacade() {
-        var repository = new InMemoryProductRepository();
-        return new DictionaryFacade(repository, new InMemoryEanCodeUniquenessPolicy(repository));
+        return new DictionaryFacade(new InMemoryProductRepository(), new InMemoryImportReportRepository());
     }
 
 }

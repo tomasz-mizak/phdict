@@ -1,8 +1,8 @@
 package online.mizak.rplsupplier;
 
-import feign.FeignException;
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import online.mizak.rplsupplier.dto.CreateDictionaryProduct;
+import online.mizak.rplsupplier.utils.JSON;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -47,24 +47,8 @@ public class BathInsert {
             for (int i = 0; i < totalProducts; i += batchSize) {
                 List<CreateDictionaryProduct> batch = products.subList(i, Math.min(i + batchSize, totalProducts));
 
-                /**
-                 * CompletableFuture.supplyAsync(() -> {
-                 *     // długotrwała operacja
-                 *     return "Wynik";
-                 * }).thenApply(result -> {
-                 *     // przetwarzanie wyniku
-                 *     return result + " przetworzony";
-                 * }).thenAccept(System.out::println)
-                 *   .exceptionally(ex -> {
-                 *       System.err.println("Błąd: " + ex.getMessage());
-                 *       return null;
-                 *   });
-                 */
-
-                CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-                        phDictApi.createDictionaryProducts(batch).join();
-                }, executorService);
-                futures.add(future);
+                var bulkImportReport = phDictApi.createDictionaryProducts(batch);
+                log.info(JSON.stringify(bulkImportReport));
 
             }
             CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();

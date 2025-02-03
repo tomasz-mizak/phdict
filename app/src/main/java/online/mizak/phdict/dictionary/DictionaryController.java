@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -25,6 +26,8 @@ class DictionaryController {
     DictionaryController(DictionaryFacade dictionaryFacade) {
         this.dictionaryFacade = dictionaryFacade;
     }
+
+    // # - - - Product - - - # //
 
     @GetMapping("/product/all")
     ResponseEntity<?> getAllDictionaryProducts() {
@@ -48,10 +51,19 @@ class DictionaryController {
     }
 
     @PostMapping("/product/batch")
-    ResponseEntity<?> createDictionaryProducts(@RequestBody List<CreateDictionaryProduct> products) {
+    ResponseEntity<?> createDictionaryProducts(
+            @RequestBody List<CreateDictionaryProduct> products,
+            @RequestParam(required = false, defaultValue = "false") Boolean updateDuplicates
+    ) {
         if (products.size() > httpBatchSize) throw new NotAcceptableException("Max batch size is ", ErrorCode.INVALID_BATCH_SIZE);
-        dictionaryFacade.createDictionaryProducts(products);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(dictionaryFacade.createDictionaryProducts(products, updateDuplicates));
+    }
+
+    // # - - - Import Report - - - #
+
+    @GetMapping("/import-report/all")
+    ResponseEntity<?> showAllImportReports() {
+        return ResponseEntity.ok(dictionaryFacade.showAllImportReports());
     }
 
 }

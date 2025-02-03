@@ -1,4 +1,4 @@
-package online.mizak.phdict.dictionary.dto;
+package online.mizak.rplsupplier.dto;
 
 public record ProductDto(
         String eanCode,

@@ -1,9 +1,11 @@
 package online.mizak.phdict.dictionary;
 
 import lombok.extern.slf4j.Slf4j;
+import online.mizak.phdict.dictionary.dto.BulkImportReport;
 import online.mizak.phdict.dictionary.dto.CreateDictionaryProduct;
+import online.mizak.phdict.dictionary.dto.DuplicatePair;
 import online.mizak.phdict.dictionary.dto.ProductDto;
-import online.mizak.phdict.dictionary.exception.NotAcceptableException;
+import online.mizak.phdict.dictionary.dto.RejectedProduct;
 import online.mizak.phdict.dictionary.exception.NotFoundException;
 import online.mizak.phdict.utils.Color;
 import online.mizak.phdict.utils.JSON;
@@ -17,39 +19,17 @@ import java.util.List;
 public class DictionaryFacade {
 
     private final ProductRepository productRepository;
-    private final EanCodeUniquenessPolicy eanCodeUniquenessPolicy;
+    private final ImportReportRepository importReportRepository;
 
     DictionaryFacade(
             ProductRepository productRepository,
-            EanCodeUniquenessPolicy eanCodeUniquenessPolicy
+            ImportReportRepository importReportRepository
     ) {
         this.productRepository = productRepository;
-        this.eanCodeUniquenessPolicy = eanCodeUniquenessPolicy;
+        this.importReportRepository = importReportRepository;
     }
 
-    public void createDictionaryProduct(CreateDictionaryProduct createDictionaryProduct) {
-        if (!eanCodeUniquenessPolicy.isUnique(createDictionaryProduct.eanCode()))
-            throw new NotAcceptableException("EAN code must be unique", ErrorCode.PRODUCT_ALREADY_EXISTS);
-        var newProductEntry = Product.of(createDictionaryProduct.eanCode(), createDictionaryProduct.tradeName());
-        productRepository.save(newProductEntry);
-        log.info("New product created: {}", newProductEntry.toDto());
-    }
-
-    public void createDictionaryProducts(List<CreateDictionaryProduct> products) {
-        List<Product> productsToSave = new ArrayList<>();
-        for (CreateDictionaryProduct product : products) {
-            try {
-                if (!eanCodeUniquenessPolicy.isUnique(product.eanCode()))
-                    throw new RuntimeException("Product with eanCode %s currently exists.".formatted(product.eanCode()));
-                var newProductEntry = Product.of(product.eanCode(), product.tradeName());
-                productsToSave.add(newProductEntry);
-            } catch (Exception e) {
-                log.warn(Color.yellowBold("Failed to save product. {}\n{}"), e.getMessage(), JSON.stringify(product));
-            }
-        }
-        productRepository.saveAll(productsToSave);
-        if (!productsToSave.isEmpty()) log.info("Created {} bulk products.", productsToSave.size());
-    }
+    // # - - - Product - - - # //
 
     public Long showProductsCount() {
         return productRepository.countAll();
@@ -61,6 +41,56 @@ public class DictionaryFacade {
 
     public ProductDto showDictionaryProductByEanCode(String eanCode) {
         return productRepository.findByEanCode(eanCode).map(Product::toDto).orElseThrow(() -> new NotFoundException("Product by EAN code not found", ErrorCode.NO_PRODUCT_AVAILABLE));
+    }
+
+    public void createDictionaryProduct(CreateDictionaryProduct createDictionaryProduct) {
+        var optionalProduct = productRepository.findByEanCode(createDictionaryProduct.eanCode());
+        if (optionalProduct.isPresent()) {
+            var exisitingProduct = optionalProduct.get();
+            exisitingProduct.updateFlyer(createDictionaryProduct.flyerURL());
+        }
+        var newProductEntry = Product.of(createDictionaryProduct.eanCode(), createDictionaryProduct.tradeName(), createDictionaryProduct.flyerURL());
+        productRepository.save(newProductEntry);
+        log.info("New product created: {}", newProductEntry.toDto());
+    }
+
+    public BulkImportReport createDictionaryProducts(List<CreateDictionaryProduct> products, Boolean updateDuplicates) {
+        List<Product> productsToSave = new ArrayList<>();
+        List<RejectedProduct> failedProducts = new ArrayList<>();
+        List<DuplicatePair> duplicatePairs = new ArrayList<>();
+        for (CreateDictionaryProduct productToCreate : products) {
+            try {
+                var optionalProduct = productRepository.findByEanCode(productToCreate.eanCode());
+                if (optionalProduct.isPresent()) {
+                    var exisitingProduct = optionalProduct.get();
+                    duplicatePairs.add(new DuplicatePair(productToCreate, exisitingProduct.toDto()));
+                    if (updateDuplicates) {
+                        exisitingProduct.updateFlyer(productToCreate.flyerURL());
+                        productsToSave.add(exisitingProduct);
+                    } else {
+                        throw new RuntimeException("Product with ID '%d' have identical eanCode '%s'.".formatted(exisitingProduct.getId(), productToCreate.eanCode()));
+                    }
+                } else {
+                    var newProductEntry = Product.of(productToCreate.eanCode(), productToCreate.tradeName(), productToCreate.flyerURL());
+                    productsToSave.add(newProductEntry);
+                }
+            } catch (Exception e) {
+                log.warn(Color.yellowBold("{}"), e.getMessage());
+                failedProducts.add(new RejectedProduct(productToCreate, e.getMessage()));
+            }
+        }
+        productRepository.saveAll(productsToSave);
+        if (!productsToSave.isEmpty()) log.info("Created {} bulk products.", productsToSave.size());
+        var importDetails = new BulkImportReport(products.size(), productsToSave.size(), failedProducts.size(), failedProducts, duplicatePairs);
+        var importReport = ImportReport.bulkReport(importDetails); // todo, czy nie powinienem dla fanu dac więcej info, np jakie identyfiatory wtedy zostały zapisane?
+        importReportRepository.save(importReport);
+        return importDetails;
+    }
+
+    // # - - - Import Report - - - #
+
+    public List<BulkImportReport> showAllImportReports() {
+        return importReportRepository.findAll().stream().map(e -> (BulkImportReport) e.getDetails()).toList();
     }
 
 }

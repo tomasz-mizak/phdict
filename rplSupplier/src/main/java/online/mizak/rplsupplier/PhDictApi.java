@@ -1,5 +1,7 @@
 package online.mizak.rplsupplier;
 
+import online.mizak.rplsupplier.dto.BulkImportReport;
+import online.mizak.rplsupplier.dto.CreateDictionaryProduct;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +17,6 @@ interface PhDictApi {
     ResponseEntity<Object> createDictionaryProduct(@RequestBody CreateDictionaryProduct createDictionaryProduct);
 
     @PostMapping("/dictionary/product/batch")
-    CompletableFuture<Object> createDictionaryProducts(@RequestBody List<CreateDictionaryProduct> createDictionaryProduct);
+    BulkImportReport createDictionaryProducts(@RequestBody List<CreateDictionaryProduct> createDictionaryProduct);
 
 }
