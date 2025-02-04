@@ -47,7 +47,7 @@ public class BathInsert {
             for (int i = 0; i < totalProducts; i += batchSize) {
                 List<CreateDictionaryProduct> batch = products.subList(i, Math.min(i + batchSize, totalProducts));
 
-                var bulkImportReport = phDictApi.createDictionaryProducts(batch);
+                var bulkImportReport = phDictApi.createDictionaryProducts(batch, "RPL-SUPPLIER");
                 log.info(JSON.stringify(bulkImportReport));
 
             }

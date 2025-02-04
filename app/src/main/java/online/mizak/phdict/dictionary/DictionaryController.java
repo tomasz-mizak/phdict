@@ -30,8 +30,9 @@ class DictionaryController {
     // # - - - Product - - - # //
 
     @GetMapping("/product/all")
-    ResponseEntity<?> getAllDictionaryProducts() {
-        return ResponseEntity.ok(dictionaryFacade.showAllProducts());
+    ResponseEntity<?> getAllDictionaryProducts(@RequestParam(required = false) String issuer) {
+        return ResponseEntity.ok(issuer == null || issuer.isBlank()
+                ? dictionaryFacade.showAllProducts() : dictionaryFacade.showAllProducts(issuer));
     }
 
     @GetMapping("/product/{eanCode}")
@@ -45,18 +46,20 @@ class DictionaryController {
     }
 
     @PostMapping("/product")
-    ResponseEntity<?> createDictionaryProduct(@RequestBody CreateDictionaryProduct createDictionaryProduct) {
-        dictionaryFacade.createDictionaryProduct(createDictionaryProduct);
+    ResponseEntity<?> createDictionaryProduct(@RequestBody CreateDictionaryProduct createDictionaryProduct, @RequestParam String issuer) {
+        dictionaryFacade.createDictionaryProduct(createDictionaryProduct, issuer);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/product/batch")
     ResponseEntity<?> createDictionaryProducts(
             @RequestBody List<CreateDictionaryProduct> products,
-            @RequestParam(required = false, defaultValue = "false") Boolean updateDuplicates
+            @RequestParam(required = false, defaultValue = "false") Boolean updateDuplicates,
+            @RequestParam String issuer
     ) {
-        if (products.size() > httpBatchSize) throw new NotAcceptableException("Max batch size is ", ErrorCode.INVALID_BATCH_SIZE);
-        return ResponseEntity.ok(dictionaryFacade.createDictionaryProducts(products, updateDuplicates));
+        if (products.size() > httpBatchSize)
+            throw new NotAcceptableException("Max batch size is ", ErrorCode.INVALID_BATCH_SIZE);
+        return ResponseEntity.ok(dictionaryFacade.createDictionaryProducts(products, updateDuplicates, issuer));
     }
 
     // # - - - Import Report - - - #

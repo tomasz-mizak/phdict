@@ -8,7 +8,6 @@ import online.mizak.phdict.dictionary.dto.ProductDto;
 import online.mizak.phdict.dictionary.dto.RejectedProduct;
 import online.mizak.phdict.dictionary.exception.NotFoundException;
 import online.mizak.phdict.utils.Color;
-import online.mizak.phdict.utils.JSON;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -39,22 +38,27 @@ public class DictionaryFacade {
         return productRepository.findAll().stream().map(Product::toDto).toList();
     }
 
+    // todo, repo filter method
+    public List<ProductDto> showAllProducts(String issuer) {
+        return productRepository.findAll().stream().filter(p -> p.getIssuer().value().equals(issuer)).map(Product::toDto).toList();
+    }
+
     public ProductDto showDictionaryProductByEanCode(String eanCode) {
         return productRepository.findByEanCode(eanCode).map(Product::toDto).orElseThrow(() -> new NotFoundException("Product by EAN code not found", ErrorCode.NO_PRODUCT_AVAILABLE));
     }
 
-    public void createDictionaryProduct(CreateDictionaryProduct createDictionaryProduct) {
+    public void createDictionaryProduct(CreateDictionaryProduct createDictionaryProduct, String issuer) {
         var optionalProduct = productRepository.findByEanCode(createDictionaryProduct.eanCode());
         if (optionalProduct.isPresent()) {
             var exisitingProduct = optionalProduct.get();
             exisitingProduct.updateFlyer(createDictionaryProduct.flyerURL());
         }
-        var newProductEntry = Product.of(createDictionaryProduct.eanCode(), createDictionaryProduct.tradeName(), createDictionaryProduct.flyerURL());
+        var newProductEntry = Product.of(createDictionaryProduct.eanCode(), createDictionaryProduct.tradeName(), createDictionaryProduct.flyerURL(), new Product.Issuer(issuer));
         productRepository.save(newProductEntry);
         log.info("New product created: {}", newProductEntry.toDto());
     }
 
-    public BulkImportReport createDictionaryProducts(List<CreateDictionaryProduct> products, Boolean updateDuplicates) {
+    public BulkImportReport createDictionaryProducts(List<CreateDictionaryProduct> products, Boolean updateDuplicates, String issuer) {
         List<Product> productsToSave = new ArrayList<>();
         List<RejectedProduct> failedProducts = new ArrayList<>();
         List<DuplicatePair> duplicatePairs = new ArrayList<>();
@@ -71,7 +75,7 @@ public class DictionaryFacade {
                         throw new RuntimeException("Product with ID '%d' have identical eanCode '%s'.".formatted(exisitingProduct.getId(), productToCreate.eanCode()));
                     }
                 } else {
-                    var newProductEntry = Product.of(productToCreate.eanCode(), productToCreate.tradeName(), productToCreate.flyerURL());
+                    var newProductEntry = Product.of(productToCreate.eanCode(), productToCreate.tradeName(), productToCreate.flyerURL(), new Product.Issuer(issuer));
                     productsToSave.add(newProductEntry);
                 }
             } catch (Exception e) {
@@ -82,8 +86,10 @@ public class DictionaryFacade {
         productRepository.saveAll(productsToSave);
         if (!productsToSave.isEmpty()) log.info("Created {} bulk products.", productsToSave.size());
         var importDetails = new BulkImportReport(products.size(), productsToSave.size(), failedProducts.size(), failedProducts, duplicatePairs);
-        var importReport = ImportReport.bulkReport(importDetails); // todo, czy nie powinienem dla fanu dac więcej info, np jakie identyfiatory wtedy zostały zapisane?
-        importReportRepository.save(importReport);
+        if (!failedProducts.isEmpty() || !duplicatePairs.isEmpty()) {
+            var importReport = ImportReport.bulkReport(importDetails);
+            importReportRepository.save(importReport);
+        }
         return importDetails;
     }
 
