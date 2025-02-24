@@ -7,7 +7,7 @@ interface ProductRepository {
 
     Product save(Product product);
 
-    void saveAll(List<Product> products);
+    List<Product> saveAll(List<Product> products);
 
     List<Product> findAll();
 
