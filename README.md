@@ -2,6 +2,12 @@
 
 Pharmacy dictionary application.
 
-## todo list
-- specification tests with spock
-- polish dictionary adapter as separated module https://rejestry.ezdrowie.gov.pl/rpl/search/public
+## Import data
+Actually are three different methods to import dictionary product data.
+1. One-by-one - adding product using create endpoint.
+2. Batch - adding products using create endpoint, eat json list as request body.
+
+All import methods return simple report about success rate.
+
+
+## Todo

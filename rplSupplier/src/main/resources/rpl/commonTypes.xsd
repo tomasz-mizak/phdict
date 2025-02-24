@@ -1,0 +1,75 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified"
+  targetNamespace="http://rejestry.ezdrowie.gov.pl/api/rpl/xsd/2.0.0/commonTypes" version="2.0.0">
+
+    <xs:simpleType name="booleanAsString">
+        <xs:annotation>
+            <xs:documentation>boolean as strings</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="TAK"/>
+            <xs:enumeration value="NIE"/>
+            <xs:enumeration value=""/>
+            <xs:maxLength value="3"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="bigIntAsString">
+        <xs:annotation>
+            <xs:documentation>bigint as string</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:maxLength value="19"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="integerAsString">
+        <xs:annotation>
+            <xs:documentation>integer as string</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:maxLength value="10"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="limitedString">
+        <xs:annotation>
+            <xs:documentation>255-limited string</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:maxLength value="255"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="dateAsString">
+        <xs:annotation>
+            <xs:documentation>date as strings</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:maxLength value="10"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="deletedAsString">
+        <xs:annotation>
+            <xs:documentation>value of field 'deleted' string</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="Skasowane"/>
+            <xs:enumeration value=""/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="changeTypeString">
+        <xs:annotation>
+            <xs:documentation>change type string</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="Nowy"/>
+            <xs:enumeration value="Zmodyfikowany"/>
+            <xs:enumeration value="Usuniety"/>
+            <xs:maxLength value="13"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+</xs:schema>
