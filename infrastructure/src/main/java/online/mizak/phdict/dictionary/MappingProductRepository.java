@@ -18,11 +18,6 @@ class MappingProductRepository implements ProductRepository {
     }
 
     @Override
-    public List<Product> saveAll(List<Product> products) {
-        return repository.saveAll(products.stream().map(JpaProduct::toJpaEntity).toList()).stream().map(JpaProduct::fromJpaEntity).toList();
-    }
-
-    @Override
     public List<Product> findAll() {
         return repository.findAll().stream().map(JpaProduct::fromJpaEntity).toList();
     }

@@ -10,6 +10,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "product")
 @AllArgsConstructor
@@ -30,13 +32,19 @@ class JpaProduct {
 
     private String issuer;
 
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
+
     static JpaProduct toJpaEntity(Product product) {
         return new JpaProduct(
                 product.getId(),
                 product.getEanCode(),
                 product.getTradeName(),
                 product.getFlyerURL(),
-                product.getIssuer().value()
+                product.getIssuer().value(),
+                product.getCreatedAt(),
+                product.getUpdatedAt()
         );
     }
 
@@ -46,7 +54,9 @@ class JpaProduct {
                 eanCode,
                 tradeName,
                 flyerURL,
-                new Product.Issuer(issuer)
+                new Product.Issuer(issuer),
+                createdAt,
+                updatedAt
         );
     }
 
