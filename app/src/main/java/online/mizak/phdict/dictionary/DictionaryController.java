@@ -54,12 +54,11 @@ class DictionaryController {
     @PostMapping("/product/batch")
     ResponseEntity<?> createDictionaryProducts(
             @RequestBody List<CreateDictionaryProduct> products,
-            @RequestParam(required = false, defaultValue = "false") Boolean updateDuplicates,
             @RequestParam String issuer
     ) {
         if (products.size() > httpBatchSize)
             throw new NotAcceptableException("Max batch size is ", ErrorCode.INVALID_BATCH_SIZE);
-        return ResponseEntity.ok(dictionaryFacade.createDictionaryProducts(products, updateDuplicates, issuer));
+        return ResponseEntity.ok(dictionaryFacade.createDictionaryProducts(products, issuer));
     }
 
     // # - - - Import Report - - - #

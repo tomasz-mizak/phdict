@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.OptionalInt;
+import java.util.stream.IntStream;
 
 @Slf4j
 @Transactional
@@ -58,26 +60,35 @@ public class DictionaryFacade {
         log.info("New product created: {}", newProductEntry.toDto());
     }
 
-    public BulkImportReport createDictionaryProducts(List<CreateDictionaryProduct> products, Boolean updateDuplicates, String issuer) {
+    public BulkImportReport createDictionaryProducts(List<CreateDictionaryProduct> products, String issuer) {
         List<Product> productsToSave = new ArrayList<>();
         List<RejectedProduct> failedProducts = new ArrayList<>();
         List<DuplicatePair> duplicatePairs = new ArrayList<>();
-        for (CreateDictionaryProduct productToCreate : products) {
+        for (int i = 0; i < products.size(); i++) {
+            CreateDictionaryProduct productToCreate = products.get(i);
             try {
-                var optionalProduct = productRepository.findByEanCode(productToCreate.eanCode());
-                if (optionalProduct.isPresent()) {
-                    var exisitingProduct = optionalProduct.get();
+
+                // Persisted duplicate.
+                var persistedProduct = productRepository.findByEanCode(productToCreate.eanCode());
+                if (persistedProduct.isPresent()) {
+                    var exisitingProduct = persistedProduct.get();
                     duplicatePairs.add(new DuplicatePair(productToCreate, exisitingProduct.toDto()));
-                    if (updateDuplicates) {
-                        exisitingProduct.updateFlyer(productToCreate.flyerURL());
-                        productsToSave.add(exisitingProduct);
-                    } else {
-                        throw new RuntimeException("Product with ID '%d' have identical eanCode '%s'.".formatted(exisitingProduct.getId(), productToCreate.eanCode()));
-                    }
-                } else {
-                    var newProductEntry = Product.of(productToCreate.eanCode(), productToCreate.tradeName(), productToCreate.flyerURL(), new Product.Issuer(issuer));
-                    productsToSave.add(newProductEntry);
+                    throw new RuntimeException("Product with ID '%d' have identical eanCode '%s'.".formatted(exisitingProduct.getId(), productToCreate.eanCode()));
                 }
+
+                // Batch duplicate
+                OptionalInt batchProductIndex = IntStream.range(0, productsToSave.size())
+                        .filter(index -> productsToSave.get(index).getEanCode().equals(productToCreate.eanCode()))
+                        .findFirst();
+                if (batchProductIndex.isPresent()) {
+                    var exisitingProduct = productsToSave.get(batchProductIndex.getAsInt());
+                    duplicatePairs.add(new DuplicatePair(productToCreate, exisitingProduct.toDto()));
+                    throw new RuntimeException("Product index #%d is duplicated in batch, on index #%d. ".formatted(i, batchProductIndex.getAsInt()));
+                }
+
+                var newProductEntry = Product.of(productToCreate.eanCode(), productToCreate.tradeName(), productToCreate.flyerURL(), new Product.Issuer(issuer));
+                productsToSave.add(newProductEntry);
+
             } catch (Exception e) {
                 log.warn(Color.yellowBold("{}"), e.getMessage());
                 failedProducts.add(new RejectedProduct(productToCreate, e.getMessage()));
