@@ -10,13 +10,19 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorDetails handleEntityNotFound(NotFoundException ex) {
+    ErrorDetails handleEntityNotFound(NotFoundException ex) {
         return new ErrorDetails(ex.getMessage(), ex.getCodeName());
     }
 
     @ExceptionHandler(NotAcceptableException.class)
     @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
-    public ErrorDetails handleIllegalArgument(NotAcceptableException ex) {
+    ErrorDetails handleIllegalArgument(NotAcceptableException ex) {
+        return new ErrorDetails(ex.getMessage(), ex.getCodeName());
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    ErrorDetails handleConflict(ConflictException ex) {
         return new ErrorDetails(ex.getMessage(), ex.getCodeName());
     }
 

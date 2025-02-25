@@ -6,9 +6,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 class DictionaryConfig {
 
-    @Bean
-    DictionaryFacade dictionaryFacade() {
+    static DictionaryFacade dictionaryFacade() {
         return new DictionaryFacade(new InMemoryProductRepository(), new InMemoryImportReportRepository());
+    }
+
+    @Bean
+    DictionaryFacade dictionaryFacade(ProductRepository productRepository, ImportReportRepository importReportRepository) {
+        return new DictionaryFacade(productRepository, importReportRepository);
     }
 
 }

@@ -2,6 +2,8 @@ package online.mizak.phdict.dictionary;
 
 import online.mizak.phdict.dictionary.dto.ProductDto;
 
+import java.time.LocalDateTime;
+
 class Product {
 
     record Issuer(String value) {
@@ -13,6 +15,8 @@ class Product {
     private final String tradeName;
     private String flyerURL;
     private Issuer issuer;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     Product(Long id, String eanCode, String tradeName, String flyerURL, Issuer issuer) {
         this.id = id;
@@ -20,6 +24,17 @@ class Product {
         this.tradeName = tradeName;
         this.flyerURL = flyerURL;
         this.issuer = issuer;
+        this.createdAt = LocalDateTime.now();
+    }
+
+    Product(Long id, String eanCode, String tradeName, String flyerURL, Issuer issuer, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.eanCode = eanCode;
+        this.tradeName = tradeName;
+        this.flyerURL = flyerURL;
+        this.issuer = issuer;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     static Product of(String eanCode, String tradeName, String flyerURL, Issuer issuer) {
@@ -52,6 +67,14 @@ class Product {
         return issuer;
     }
 
+    LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
     ProductDto toDto() {
         return new ProductDto(eanCode, tradeName, flyerURL);
     }
@@ -59,5 +82,6 @@ class Product {
     void updateFlyer(String flyerURL) {
         if (flyerURL == null || flyerURL.isBlank()) return;
         this.flyerURL = flyerURL;
+        updatedAt = LocalDateTime.now();
     }
 }

@@ -76,24 +76,6 @@
             <artifactId>groovy</artifactId>
             <version>${groovy.version}</version>
         </dependency>
-        <dependency> <!-- enables mocking of classes (in addition to interfaces) -->
-            <groupId>net.bytebuddy</groupId>
-            <artifactId>byte-buddy</artifactId>
-            <version>1.15.8</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency> <!-- enables mocking of classes without default constructor (together with ByteBuddy or CGLIB) -->
-            <groupId>org.objenesis</groupId>
-            <artifactId>objenesis</artifactId>
-            <version>3.4</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency> <!-- only required if Hamcrest matchers are used -->
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-core</artifactId>
-            <version>3.0</version>
-            <scope>test</scope>
-        </dependency>
 
     </dependencies>
 

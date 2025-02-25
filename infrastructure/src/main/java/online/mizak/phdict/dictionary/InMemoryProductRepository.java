@@ -1,5 +1,6 @@
 package online.mizak.phdict.dictionary;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,15 +17,6 @@ class InMemoryProductRepository implements ProductRepository {
         Product persisted = new Product(id, product.getEanCode(), product.getTradeName(), product.getFlyerURL(), product.getIssuer());
         store.put(persisted.getId(), persisted);
         return persisted;
-    }
-
-    @Override
-    public void saveAll(List<Product> products) {
-        products.forEach(product -> {
-            var id = product.isPersisted() ? product.getId() : idGenerator.incrementAndGet();
-            Product persisted = new Product(id, product.getEanCode(), product.getTradeName(), product.getFlyerURL(), product.getIssuer());
-            store.put(persisted.getId(), persisted);
-        });
     }
 
     @Override
