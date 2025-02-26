@@ -57,7 +57,7 @@ public class DictionaryFacade {
         if (optionalProduct.isPresent()) {
             throw new ConflictException("Cannot create new dictionary product, because product with eanCode '%s' already exists.".formatted(createDictionaryProduct.eanCode()), CreateProductExceptionType.ALREADY_EXISTS);
         }
-        var newProductEntry = Product.of(createDictionaryProduct.eanCode(), createDictionaryProduct.tradeName(), createDictionaryProduct.flyerURL(), new Product.Issuer(issuer));
+        var newProductEntry = Product.of(createDictionaryProduct.eanCode(), createDictionaryProduct.tradeName(), createDictionaryProduct.flyerURL(), createDictionaryProduct.characteristicsURL(), new Product.Issuer(issuer));
         productRepository.save(newProductEntry);
         log.info("New product created: {}", newProductEntry.toDto());
     }
@@ -74,7 +74,7 @@ public class DictionaryFacade {
                 String message = "Cannot create new dictionary product, because product with eanCode '%s' already exists.".formatted(createDictionaryProduct.eanCode());
                 failedProducts.add(new RejectedProduct(createDictionaryProduct, message));
             } else {
-                var newProductEntry = Product.of(createDictionaryProduct.eanCode(), createDictionaryProduct.tradeName(), createDictionaryProduct.flyerURL(), new Product.Issuer(issuer));
+                var newProductEntry = Product.of(createDictionaryProduct.eanCode(), createDictionaryProduct.tradeName(), createDictionaryProduct.flyerURL(), createDictionaryProduct.characteristicsURL(), new Product.Issuer(issuer));
                 productRepository.save(newProductEntry);
                 savedProducts++;
             }

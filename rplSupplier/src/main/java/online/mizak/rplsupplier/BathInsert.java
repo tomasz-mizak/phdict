@@ -7,11 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @Slf4j
 @Service
@@ -21,8 +17,6 @@ public class BathInsert {
     private String overallUrl;
 
     private final PhDictApi phDictApi;
-
-    private final ExecutorService executorService = Executors.newFixedThreadPool(5);
 
     BathInsert(PhDictApi phDictApi) {
         this.phDictApi = phDictApi;
@@ -42,8 +36,6 @@ public class BathInsert {
             int batchSize = 1000;
             int totalProducts = products.size();
 
-            List<CompletableFuture<Void>> futures = new ArrayList<>();
-
             for (int i = 0; i < totalProducts; i += batchSize) {
                 List<CreateDictionaryProduct> batch = products.subList(i, Math.min(i + batchSize, totalProducts));
 
@@ -51,7 +43,6 @@ public class BathInsert {
                 log.info(JSON.stringify(bulkImportReport));
 
             }
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 
             log.info("Upload finished.");
 
@@ -63,12 +54,6 @@ public class BathInsert {
         } catch (IOException e) {
             log.error("Error during processing: {}", e.getMessage());
         }
-    }
-
-    private String formatTime(long elapsedTimeMillis) {
-        long seconds = (elapsedTimeMillis / 1000) % 60;
-        long minutes = (elapsedTimeMillis / 1000) / 60;
-        return String.format("%02d:%02d", minutes, seconds);
     }
 
 }

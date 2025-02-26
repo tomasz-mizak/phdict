@@ -28,7 +28,11 @@ class JpaProduct {
 
     private String tradeName;
 
+    @Column(name = "flyer_url")
     private String flyerURL;
+
+    @Column(name = "characteristics_url")
+    private String characteristicsURL;
 
     private String issuer;
 
@@ -42,6 +46,7 @@ class JpaProduct {
                 product.getEanCode(),
                 product.getTradeName(),
                 product.getFlyerURL(),
+                product.getCharacteristicsURL(),
                 product.getIssuer().value(),
                 product.getCreatedAt(),
                 product.getUpdatedAt()
@@ -54,6 +59,7 @@ class JpaProduct {
                 eanCode,
                 tradeName,
                 flyerURL,
+                characteristicsURL,
                 new Product.Issuer(issuer),
                 createdAt,
                 updatedAt
