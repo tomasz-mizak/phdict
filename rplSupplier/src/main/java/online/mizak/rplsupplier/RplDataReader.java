@@ -37,7 +37,8 @@ abstract class RplDataReader {
                     } catch (Exception ignored) {
                         // Because PRL provider uses phrases like 'Bezterminowy', and in the future can use other phrases.
                     }
-                };
+                }
+                ;
 
                 var tradeName = product.getNazwaProduktu();
                 if (tradeName == null || tradeName.isEmpty()) continue;
@@ -49,9 +50,10 @@ abstract class RplDataReader {
                     var isEanValid = eanCode != null && !eanCode.isEmpty();
 
                     var flyerURL = (product.getUlotka() == null || product.getUlotka().isBlank()) ? product.getUlotkaImportRownolegly() : product.getUlotka();
+                    var characteristicsURL = product.getCharakterystyka();
 
                     if (isNotDeleted && isEanValid) {
-                        createDictionaryProducts.add(new CreateDictionaryProduct(eanCode, tradeName, flyerURL));
+                        createDictionaryProducts.add(new CreateDictionaryProduct(eanCode, tradeName, flyerURL, characteristicsURL));
                     }
                 }
             }

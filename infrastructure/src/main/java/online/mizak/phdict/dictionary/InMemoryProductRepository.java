@@ -14,7 +14,7 @@ class InMemoryProductRepository implements ProductRepository {
     @Override
     public Product save(Product product) {
         var id = product.isPersisted() ? product.getId() : idGenerator.incrementAndGet();
-        Product persisted = new Product(id, product.getEanCode(), product.getTradeName(), product.getFlyerURL(), product.getIssuer());
+        Product persisted = new Product(id, product.getEanCode(), product.getTradeName(), product.getFlyerURL(), product.getCharacteristicsURL(), product.getIssuer());
         store.put(persisted.getId(), persisted);
         return persisted;
     }
